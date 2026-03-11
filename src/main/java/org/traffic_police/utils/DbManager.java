@@ -22,9 +22,9 @@ public class DbManager {
             if (connection != null) {
                 assert connection != null;
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT * FROM Violations");
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM Violation");
                 while (resultSet.next()) {
-                    violations.add(new Violation(resultSet.getString("protocol_number"), resultSet.getString("violation_date"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
+                    violations.add(new Violation(resultSet.getString("protocolNumber"), resultSet.getString("violationDate"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
                 }
             }
         }
@@ -36,12 +36,13 @@ public class DbManager {
         try (Connection connection = Main.getConnection()) {
             if (connection != null) {
                 assert connection != null;
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM Violations WHERE DATE(violation_date) BETWEEN ? AND ?");
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM Violation WHERE DATE(violationDate) BETWEEN ? AND ?");
                 statement.setString(1, startDate);
                 statement.setString(2, endDate);
+                System.out.println(statement.toString());
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    violations.add(new Violation(resultSet.getString("protocol_number"), resultSet.getString("violation_date"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
+                    violations.add(new Violation(resultSet.getString("protocolNumber"), resultSet.getString("violationDate"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
                 }
             }
         }
@@ -53,11 +54,11 @@ public class DbManager {
         try (Connection connection = Main.getConnection()) {
             if (connection != null) {
                 assert connection != null;
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM Violations WHERE car = ?");
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM Violation WHERE car = ?");
                 statement.setString(1, car);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    violations.add(new Violation(resultSet.getString("protocol_number"), resultSet.getString("violation_date"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
+                    violations.add(new Violation(resultSet.getString("protocolNumber"), resultSet.getString("violationDate"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
                 }
             }
         }
@@ -69,11 +70,11 @@ public class DbManager {
         try (Connection connection = Main.getConnection()) {
             if (connection != null) {
                 assert connection != null;
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM Violations inner join Car on Violations.car = Car.reg_number where Car.owner = ?");
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM Violation inner join Car on Violation.car = Car.regNumber where Car.owner = ?");
                 statement.setString(1, driver);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    violations.add(new Violation(resultSet.getString("protocol_number"), resultSet.getString("violation_date"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
+                    violations.add(new Violation(resultSet.getString("protocolNumber"), resultSet.getString("violationDate"), resultSet.getString("place"), resultSet.getString("car"), resultSet.getString("code"), resultSet.getString("other_driver_info")));
                 }
             }
         }
@@ -86,9 +87,9 @@ public class DbManager {
             if (connection != null) {
                 assert connection != null;
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT * FROM Drivers");
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM Driver");
                 while (resultSet.next()) {
-                    drivers.add(new Driver(resultSet.getString("license_number"), resultSet.getString("surname"), resultSet.getString("name"), resultSet.getString("middle_name"), resultSet.getString("address")));
+                    drivers.add(new Driver(resultSet.getString("licenseNumber"), resultSet.getString("surname"), resultSet.getString("name"), resultSet.getString("middleName"), resultSet.getString("address")));
                 }
             }
         }
@@ -116,11 +117,11 @@ public class DbManager {
         try (Connection connection = Main.getConnection()) {
             if (connection != null) {
                 assert connection != null;
-                PreparedStatement statement = connection.prepareStatement("SELECT reg_number, brand, model, color, concat(surname, ' ', name, ' ', middle_name) as fio FROM Cars inner join Drivers on Cars.owner = Drivers.license_number WHERE reg_number = ?");
+                PreparedStatement statement = connection.prepareStatement("SELECT regNumber, brand, model, color, concat(surname, ' ', name, ' ', middleName) as fio FROM Car inner join Driver on Car.owner = Driver.licenseNumber WHERE regNumber = ?");
                 statement.setString(1, regNumber);
                 ResultSet resultSet = statement.executeQuery();
                 while (resultSet.next()) {
-                    car = new Car(resultSet.getString("reg_number"), resultSet.getString("brand"), resultSet.getString("model"), resultSet.getString("color"), resultSet.getString("fio"));
+                    car = new Car(resultSet.getString("regNumber"), resultSet.getString("brand"), resultSet.getString("model"), resultSet.getString("color"), resultSet.getString("fio"));
                 }
             }
         }

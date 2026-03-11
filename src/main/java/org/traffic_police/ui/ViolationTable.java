@@ -31,6 +31,7 @@ public class ViolationTable extends BaseForm {
     private JFormattedTextField endDateField;
     private JTable violationTable;
     private JButton applyButton;
+    private JButton resetButton;
 
     private List<Violation> violations = new ArrayList<>();
 
@@ -53,7 +54,7 @@ public class ViolationTable extends BaseForm {
      *                   иначе окно просто закрывается
      */
     public ViolationTable() {
-        super(700, 500, true);
+        super(900, 600, true);
         setContentPane(mainPanel);
         setVisible(true);
         initViolations();
@@ -62,12 +63,12 @@ public class ViolationTable extends BaseForm {
         initDriverBox();
         initDateFields();
         applyButton.addActionListener(e -> applyFilters());
+        resetButton.addActionListener(e -> resetFilters());
     }
 
     private void initViolations() {
         try {
             violations = DbManager.getViolations();
-            updateTable();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
@@ -138,7 +139,7 @@ public class ViolationTable extends BaseForm {
         violationTable.setModel(model);
         // Сделать таблицу нередактируемой
         violationTable.setDefaultEditor(Object.class, null);
-
+        updateTable();
         violationTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -191,7 +192,7 @@ public class ViolationTable extends BaseForm {
                     return;
                 }
                 try {
-                    violations = DbManager.getViolationsBetweenDates(startDate, endDate);
+                    violations = DbManager.getViolationsBetweenDates(new SimpleDateFormat("yyyy-MM-dd").format(startDateDate), new SimpleDateFormat("yyyy-MM-dd").format(endDateDate));
                     updateTable();
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
@@ -199,6 +200,35 @@ public class ViolationTable extends BaseForm {
             } catch (ParseException e) {
                 JOptionPane.showMessageDialog(null, "Некорректный формат даты", "Ошибка", JOptionPane.ERROR_MESSAGE);
             }
+        } else if (selectedDriver != null) {
+            try {
+                violations = DbManager.getViolationsByDriver(selectedDriver.getLicenseNumber());
+                updateTable();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            try {
+                violations = DbManager.getViolations();
+                updateTable();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void resetFilters() {
+        startDateField.setText("");
+        endDateField.setText(new SimpleDateFormat("dd.MM.yyyy").format(new Date(new Date().getTime())));
+        try {
+            if (selectedDriver != null) {
+                violations = DbManager.getViolationsByDriver(selectedDriver.getLicenseNumber());
+            } else {
+                violations = DbManager.getViolations();
+            }
+            updateTable();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

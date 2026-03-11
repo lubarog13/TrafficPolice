@@ -22,7 +22,7 @@ public class Main {
 
     public static Connection getConnection() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/traffic_police", "new_cybrid", "1234");
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/traffic_police", "root", "1234");
         } catch (SQLException e) {
             e.printStackTrace();
         }
