@@ -168,6 +168,18 @@ public class ViolationTable extends BaseForm {
                         }
                         JOptionPane.showMessageDialog(null, "Автомобиль: " + car.getBrand() + " " + car.getModel() + " " + car.getColor() + "\nВладелец: " + car.getOwner(), "Информация о автомобиле", JOptionPane.INFORMATION_MESSAGE);
                     }
+                    if (column == 1) {
+                        String date = tableData[row][1];
+                        List<String> driverFios;
+                        try {
+                            driverFios = DbManager.getDriversInDate(date.split(" ")[0]);
+                            String driverFiosString = String.join(", ", driverFios);
+                            JOptionPane.showMessageDialog(null, "Водители, совершившие нарушения в этот день: " + driverFiosString, "Информация о водителях", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (SQLException e1) {
+                            JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + e1.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                    }
                 }
             }
         });

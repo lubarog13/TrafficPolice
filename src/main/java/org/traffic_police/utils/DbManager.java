@@ -128,5 +128,21 @@ public class DbManager {
         return car;
     }
 
+    public static List<String> getDriversInDate(String date) throws SQLException {
+        List<String> drivers = new ArrayList<>();
+        try (Connection connection = Main.getConnection()) {
+            if (connection != null) {
+                assert connection != null;
+                PreparedStatement statement = connection.prepareStatement("select concat(surname, ' ', name, ' ', middleName) as fio from Driver inner join Car on Car.owner=Driver.licenseNumber inner join Violation on Car.regNumber = Violation.car where DATE(violationDate) = ?");        
+                statement.setString(1, date);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    drivers.add(resultSet.getString("fio"));
+                }
+            }
+        }
+        return drivers;
+    }
+
 
 }
