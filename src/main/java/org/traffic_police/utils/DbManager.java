@@ -1,4 +1,4 @@
-package org.traffic_police.ui;
+package org.traffic_police.utils;
 
 import java.sql.Statement;
 import java.sql.Connection;
@@ -11,6 +11,9 @@ import java.util.List;
 
 import org.traffic_police.Main;
 import org.traffic_police.model.Violation;
+import org.traffic_police.model.ViolationType;
+import org.traffic_police.model.Driver;
+import org.traffic_police.model.Car;
 
 public class DbManager {
     public static List<Violation> getViolations() throws SQLException {
@@ -76,4 +79,53 @@ public class DbManager {
         }
         return violations;
     }
+
+    public static List<Driver> getDrivers() throws SQLException {
+        List<Driver> drivers = new ArrayList<>();
+        try (Connection connection = Main.getConnection()) {
+            if (connection != null) {
+                assert connection != null;
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT * FROM Drivers");
+                while (resultSet.next()) {
+                    drivers.add(new Driver(resultSet.getString("license_number"), resultSet.getString("surname"), resultSet.getString("name"), resultSet.getString("middle_name"), resultSet.getString("address")));
+                }
+            }
+        }
+        return drivers;
+    }
+
+    public static ViolationType getViolationTypeByCode(String code) throws SQLException {
+        ViolationType violationType = null;
+        try (Connection connection = Main.getConnection()) {
+            if (connection != null) {
+                assert connection != null;
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM ViolationTypes WHERE code = ?");
+                statement.setString(1, code);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    violationType = new ViolationType(resultSet.getString("code"), resultSet.getString("name"), resultSet.getDouble("price"));
+                }
+            }
+        }
+        return violationType;
+    }
+
+    public static Car getCarByRegNumber(String regNumber) throws SQLException {
+        Car car = null;
+        try (Connection connection = Main.getConnection()) {
+            if (connection != null) {
+                assert connection != null;
+                PreparedStatement statement = connection.prepareStatement("SELECT reg_number, brand, model, color, concat(surname, ' ', name, ' ', middle_name) as fio FROM Cars inner join Drivers on Cars.owner = Drivers.license_number WHERE reg_number = ?");
+                statement.setString(1, regNumber);
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    car = new Car(resultSet.getString("reg_number"), resultSet.getString("brand"), resultSet.getString("model"), resultSet.getString("color"), resultSet.getString("fio"));
+                }
+            }
+        }
+        return car;
+    }
+
+
 }
