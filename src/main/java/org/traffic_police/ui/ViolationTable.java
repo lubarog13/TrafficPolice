@@ -1,8 +1,12 @@
 package org.traffic_police.ui;
 
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.intellij.uiDesigner.core.Spacer;
 import org.traffic_police.utils.BaseForm;
 import org.traffic_police.utils.DbManager;
 
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -23,6 +27,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DateFormatter;
 import java.text.ParseException;
 import javax.swing.text.DefaultFormatterFactory;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 public class ViolationTable extends BaseForm {
     private JPanel mainPanel;
@@ -32,10 +38,14 @@ public class ViolationTable extends BaseForm {
     private JTable violationTable;
     private JButton applyButton;
     private JButton resetButton;
+    private JButton addDriverButton;
+    private JButton addCarButton;
+    private JButton addViolationButton;
 
     private List<Violation> violations = new ArrayList<>();
 
-    private String[] columnNames = {"Номер протокола", "Дата нарушения", "Место нарушения", "Автомобиль", "Код нарушения", "Другая информация"};    private String[][] data = new String[0][];
+    private String[] columnNames = {"Номер протокола", "Дата нарушения", "Место нарушения", "Автомобиль", "Код нарушения", "Другая информация"};
+    private String[][] data = new String[0][];
     private String[][] tableData = new String[0][];
 
     private List<Driver> drivers = new ArrayList<>();
@@ -64,6 +74,34 @@ public class ViolationTable extends BaseForm {
         initDateFields();
         applyButton.addActionListener(e -> applyFilters());
         resetButton.addActionListener(e -> resetFilters());
+        initButtons();
+    }
+
+    private void initButtons() {
+        addDriverButton.addActionListener(e -> {
+            if (checkIsAdmin()) {
+                new DriverForm();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Недостаточно прав", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        addCarButton.addActionListener(e -> {
+            if (checkIsAdmin()) {
+                new CarForm();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Недостаточно прав", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        addViolationButton.addActionListener(e -> {
+            if (checkIsAdmin()) {
+                new ViolationForm();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Недостаточно прав", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     private void initViolations() {
@@ -99,14 +137,14 @@ public class ViolationTable extends BaseForm {
                 }
                 return;
             } else {
-            selectedDriver = drivers.get(driverBox.getSelectedIndex() - 1);
-            try {
-                violations = DbManager.getViolationsByDriver(selectedDriver.getLicenseNumber());
-                updateTable();
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                selectedDriver = drivers.get(driverBox.getSelectedIndex() - 1);
+                try {
+                    violations = DbManager.getViolationsByDriver(selectedDriver.getLicenseNumber());
+                    updateTable();
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                }
             }
-        }
         });
     }
 
@@ -229,6 +267,23 @@ public class ViolationTable extends BaseForm {
         }
     }
 
+    private Boolean checkIsAdmin() {
+        JPasswordField pf = new JPasswordField();
+        int okCxl = JOptionPane.showConfirmDialog(null, pf, "Пароль администратора", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        
+        if (okCxl == JOptionPane.OK_OPTION) {
+          String password = new String(pf.getPassword());
+          try {
+            DriverManager.getConnection("jdbc:mysql://localhost:3306/traffic_police", "admin", password);
+            return true;
+          } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+          }
+        }
+        return false;
+    }
+
     private void resetFilters() {
         startDateField.setText("");
         endDateField.setText(new SimpleDateFormat("dd.MM.yyyy").format(new Date(new Date().getTime())));
@@ -243,4 +298,86 @@ public class ViolationTable extends BaseForm {
             JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + ex.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new GridLayoutManager(5, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainPanel.add(panel1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JPanel panel2 = new JPanel();
+        panel2.setLayout(new GridLayoutManager(1, 8, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.add(panel2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        driverBox = new JComboBox();
+        panel2.add(driverBox, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("Водители");
+        panel2.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        startDateField = new JFormattedTextField();
+        startDateField.setText("дд.мм.гггг");
+        panel2.add(startDateField, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        endDateField = new JFormattedTextField();
+        endDateField.setText("дд.мм.ггггг");
+        panel2.add(endDateField, new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label2 = new JLabel();
+        label2.setText("С");
+        panel2.add(label2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JLabel label3 = new JLabel();
+        label3.setText("по");
+        panel2.add(label3, new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        applyButton = new JButton();
+        applyButton.setText("Применить");
+        panel2.add(applyButton, new GridConstraints(0, 6, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        resetButton = new JButton();
+        resetButton.setText("Сбросить");
+        panel2.add(resetButton, new GridConstraints(0, 7, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JScrollPane scrollPane1 = new JScrollPane();
+        panel1.add(scrollPane1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        violationTable = new JTable();
+        scrollPane1.setViewportView(violationTable);
+        final JPanel panel3 = new JPanel();
+        panel3.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.add(panel3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        addDriverButton = new JButton();
+        addDriverButton.setText("Добавить водителя");
+        panel3.add(addDriverButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer1 = new Spacer();
+        panel3.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        addCarButton = new JButton();
+        addCarButton.setText("Добавить автомобиль");
+        panel3.add(addCarButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        addViolationButton = new JButton();
+        addViolationButton.setText("\uD83D\uDEE1\uFE0FДобавить правонарушение");
+        panel3.add(addViolationButton, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final Spacer spacer2 = new Spacer();
+        panel1.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer3 = new Spacer();
+        panel1.add(spacer3, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        final Spacer spacer4 = new Spacer();
+        mainPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        mainPanel.add(spacer5, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return mainPanel;
+    }
+
 }

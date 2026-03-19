@@ -23,6 +23,9 @@ public class Driver {
         return surname;
     }
     
+    public String getName() {
+        return name;
+    }
     public String getMiddleName() {
         return middleName;
     }
