@@ -13,7 +13,7 @@ public class BaseForm extends JFrame
     /**
      * Заголовок приложения
      */
-    public static String APP_TITLE = "Выставка собак";
+    public static String APP_TITLE = "Данные о правонарушениях";
     
     /**
      * Иконка приложения, загружаемая из ресурсов.
