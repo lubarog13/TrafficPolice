@@ -1,6 +1,8 @@
 package org.traffic_police;
 
+import org.traffic_police.ui.ViolationForm;
 import org.traffic_police.ui.ViolationTable;
+import org.traffic_police.ui.CarForm;
 
 import javax.swing.*;
 import java.sql.Connection;

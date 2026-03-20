@@ -27,6 +27,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DateFormatter;
 import java.text.ParseException;
 import javax.swing.text.DefaultFormatterFactory;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 public class ViolationTable extends BaseForm {
     private JPanel mainPanel;
@@ -36,6 +38,9 @@ public class ViolationTable extends BaseForm {
     private JTable violationTable;
     private JButton applyButton;
     private JButton resetButton;
+    private JButton addDriverButton;
+    private JButton addCarButton;
+    private JButton addViolationButton;
 
     private List<Violation> violations = new ArrayList<>();
 
@@ -69,6 +74,34 @@ public class ViolationTable extends BaseForm {
         initDateFields();
         applyButton.addActionListener(e -> applyFilters());
         resetButton.addActionListener(e -> resetFilters());
+        initButtons();
+    }
+
+    private void initButtons() {
+        addDriverButton.addActionListener(e -> {
+            if (checkIsAdmin()) {
+                new DriverForm();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Недостаточно прав", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        addCarButton.addActionListener(e -> {
+            if (checkIsAdmin()) {
+                new CarForm();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Недостаточно прав", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        addViolationButton.addActionListener(e -> {
+            if (checkIsAdmin()) {
+                new ViolationForm();
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(null, "Недостаточно прав", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     private void initViolations() {
@@ -234,6 +267,23 @@ public class ViolationTable extends BaseForm {
         }
     }
 
+    private Boolean checkIsAdmin() {
+        JPasswordField pf = new JPasswordField();
+        int okCxl = JOptionPane.showConfirmDialog(null, pf, "Пароль администратора", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (okCxl == JOptionPane.OK_OPTION) {
+          String password = new String(pf.getPassword());
+          try {
+            DriverManager.getConnection("jdbc:mysql://localhost:3306/traffic_police", "admin", password);
+            return true;
+          } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+          }
+        }
+        return false;
+    }
+
     private void resetFilters() {
         startDateField.setText("");
         endDateField.setText(new SimpleDateFormat("dd.MM.yyyy").format(new Date(new Date().getTime())));
@@ -300,16 +350,27 @@ public class ViolationTable extends BaseForm {
         violationTable = new JTable();
         scrollPane1.setViewportView(violationTable);
         final JPanel panel3 = new JPanel();
-        panel3.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel3.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
         panel1.add(panel3, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        addDriverButton = new JButton();
+        addDriverButton.setText("Добавить водителя");
+        panel3.add(addDriverButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        panel1.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel3.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        addCarButton = new JButton();
+        addCarButton.setText("Добавить автомобиль");
+        panel3.add(addCarButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        addViolationButton = new JButton();
+        addViolationButton.setText("\uD83D\uDEE1\uFE0FДобавить правонарушение");
+        panel3.add(addViolationButton, new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
-        panel1.add(spacer2, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        panel1.add(spacer2, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer3 = new Spacer();
-        mainPanel.add(spacer3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        panel1.add(spacer3, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer4 = new Spacer();
-        mainPanel.add(spacer4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        mainPanel.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        final Spacer spacer5 = new Spacer();
+        mainPanel.add(spacer5, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
     }
 
     /**
@@ -318,4 +379,5 @@ public class ViolationTable extends BaseForm {
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
     }
+
 }
