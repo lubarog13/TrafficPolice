@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.sql.SQLException;
 import java.util.Locale;
-import org.traffic_police.ui.ViolationTable;
 
 public class CarForm extends BaseForm {
     private JPanel mainPanel;
@@ -28,13 +27,17 @@ public class CarForm extends BaseForm {
     private JComboBox<String> driverBox;
     private JButton saveButton;
     private JButton cancelButton;
+    private JComboBox<String> carBox;
 
     private List<Driver> drivers = new ArrayList<>();
+    private List<Car> cars = new ArrayList<>();
+    private Car selectedItem;
 
     public CarForm() {
         super(500, 400, false);
         setContentPane(mainPanel);
         initDriverBox();
+        initCarBox();
         saveButton.addActionListener(e -> saveCar());
         cancelButton.addActionListener(e -> cancel());
         setVisible(true);
@@ -43,6 +46,42 @@ public class CarForm extends BaseForm {
     private void cancel() {
         new ViolationTable();
         dispose();
+    }
+
+    private void initCarBox() {
+        this.carBox.addItem("Редактировать автомобиль");
+        try {
+            this.cars = DbManager.getCars();
+            for (Car car : cars) {
+                carBox.addItem(car.toString());
+            }
+            this.carBox.addActionListener(e -> {
+                if (carBox.getSelectedIndex() == 0) {
+                    regNumberField.setEditable(true);
+                    regNumberField.setText("");
+                    brandField.setText("");
+                    modelField.setText("");
+                    colorField.setText("");
+                    saveButton.setText("Добавить");
+                    return;
+                }
+                selectedItem = cars.get(carBox.getSelectedIndex() - 1);
+                regNumberField.setText(selectedItem.getRegNumber());
+                brandField.setText(selectedItem.getBrand());
+                modelField.setText(selectedItem.getModel());
+                colorField.setText(selectedItem.getColor());
+                for (Driver driver : this.drivers) {
+                    if (driver.getLicenseNumber().equals(selectedItem.getOwner())) {
+                        driverBox.setSelectedItem(driver.getFullName());
+                        break;
+                    }
+                }
+                regNumberField.setEditable(false);
+                saveButton.setText("Сохранить");
+            });
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Произошла ошибка при загрузке данных: " + e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void initDriverBox() {
@@ -68,8 +107,12 @@ public class CarForm extends BaseForm {
         }
         Car car = new Car(regNumber, brand, model, color, owner);
         try {
-            DbManager.addCar(car);
-            JOptionPane.showMessageDialog(null, "Автомобиль успешно добавлен", "Успешно", JOptionPane.INFORMATION_MESSAGE);
+            if (selectedItem == null) {
+                DbManager.addCar(car);
+            } else {
+                DbManager.updateCar(car);
+            }
+            JOptionPane.showMessageDialog(null, "Автомобиль успешно " + (this.selectedItem == null ? "добавлен" : "изменен"), "Успешно", JOptionPane.INFORMATION_MESSAGE);
             cancel();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Произошла ошибка при добавлении автомобиля: " + e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
@@ -94,7 +137,7 @@ public class CarForm extends BaseForm {
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainPanel.add(panel1, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label1 = new JLabel();
         Font label1Font = this.$$$getFont$$$(null, -1, 28, label1.getFont());
@@ -103,7 +146,7 @@ public class CarForm extends BaseForm {
         panel1.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridLayoutManager(6, 2, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.add(panel2, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        panel1.add(panel2, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         regNumberField = new JTextField();
         panel2.add(regNumberField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         final JLabel label2 = new JLabel();
@@ -135,6 +178,8 @@ public class CarForm extends BaseForm {
         cancelButton = new JButton();
         cancelButton.setText("Отменить");
         panel2.add(cancelButton, new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        carBox = new JComboBox();
+        panel1.add(carBox, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         mainPanel.add(spacer1, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final Spacer spacer2 = new Spacer();
@@ -173,4 +218,5 @@ public class CarForm extends BaseForm {
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
     }
+
 }

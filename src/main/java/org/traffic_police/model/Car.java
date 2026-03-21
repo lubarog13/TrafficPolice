@@ -54,4 +54,8 @@ public class Car {
     public void setOwner(String owner) {
         this.owner = owner;
     }
+
+    public String toString() {
+        return this.brand + ' ' + this.model + ' ' + this.regNumber;
+    }
 }

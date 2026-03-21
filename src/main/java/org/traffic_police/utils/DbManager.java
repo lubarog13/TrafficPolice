@@ -89,7 +89,7 @@ public class DbManager {
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT * FROM Driver");
                 while (resultSet.next()) {
-                    drivers.add(new Driver(resultSet.getString("licenseNumber"), resultSet.getString("surname"), resultSet.getString("name"), resultSet.getString("middleName"), resultSet.getString("address")));
+                    drivers.add(new Driver(resultSet.getString("licenseNumber"), resultSet.getString("surname"), resultSet.getString("name"), resultSet.getString("middleName"), resultSet.getString("address"), resultSet.getString("other_info")));
                 }
             }
         }
@@ -181,12 +181,13 @@ public class DbManager {
                 if (driver.getMiddleName() == null) {
                     driver.setMiddleName("");
                 }
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO Driver (licenseNumber, surname, name, middleName, address) VALUES (?, ?, ?, ?, ?)");
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO Driver (licenseNumber, surname, name, middleName, address, other_info) VALUES (?, ?, ?, ?, ?, ?)");
                 statement.setString(1, driver.getLicenseNumber());
                 statement.setString(2, driver.getSurname());
                 statement.setString(3, driver.getName());
                 statement.setString(4, driver.getMiddleName());
                 statement.setString(5, driver.getAddress());
+                statement.setString(6, driver.getOtherInfo());
                 statement.executeUpdate();
             }
         }
@@ -259,12 +260,13 @@ public class DbManager {
         try (Connection connection = Main.getConnection()) {
             if (connection != null) {
                 assert connection != null;
-                PreparedStatement statement = connection.prepareStatement("UPDATE Driver SET surname = ?, name = ?, middleName = ?, address = ? WHERE licenseNumber = ?");
+                PreparedStatement statement = connection.prepareStatement("UPDATE Driver SET surname = ?, name = ?, middleName = ?, address = ?, other_info = ? WHERE licenseNumber = ?");
                 statement.setString(1, driver.getSurname());
                 statement.setString(2, driver.getName());
                 statement.setString(3, driver.getMiddleName());
                 statement.setString(4, driver.getAddress());
                 statement.setString(5, driver.getLicenseNumber());
+                statement.setString(6, driver.getOtherInfo());
                 statement.executeUpdate();
             }
         }
